@@ -1,14 +1,13 @@
-let form = document.getElementById("form"),
-  textInput = document.getElementById("textInput"),
-  dateInput = document.getElementById("dateInput"),
-  textarea = document.getElementById("textarea"),
-  msg = document.getElementById("msg"),
-  tasks = document.getElementById("tasks"),
-  add = document.getElementById("add");
+let form = document.getElementById("form");
+let textInput = document.getElementById("textInput");
+let dateInput = document.getElementById("dateInput");
+let textarea = document.getElementById("textarea");
+let msg = document.getElementById("msg");
+let tasks = document.getElementById("tasks");
+let add = document.getElementById("add");
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
-  console.log("Button clicked");
   formValidation();
 });
 
@@ -22,52 +21,73 @@ let formValidation = () => {
     acceptData();
     add.setAttribute("data-bs-dismiss", "modal");
     add.click();
+
     (() => {
       add.setAttribute("data-bs-dismiss", "");
     })();
   }
 };
 
-let data = {};
+let data = [];
 
 let acceptData = () => {
-  data["task"] = textInput.value;
-  data["date"] = dateInput.value;
-  data["description"] = textarea.value;
-  createTask();
+  data.push({
+    text: textInput.value,
+    date: dateInput.value,
+    description: textarea.value,
+  });
+
+  localStorage.setItem("data", JSON.stringify(data));
+
+  console.log(data);
+  createTasks();
 };
 
-let createTask = () => {
-  tasks.innerHTML += `
-  <div>
-      <span class="fw-bold">${data.task}</span>
-      <span class="text-secondary small">${data.date}</span>
-      <p>${data.description}</p>
-    <span class="options">
-      <i data-bs-toggle="modal" data-bs-target="#form" onClick="editTask(this)" class="fas fa-edit"></i>
-      <i onClick="deleteTask(this)" class="fas fa-trash-alt"></i>
-    </span>
-  </div>
-  `;
+let createTasks = () => {
+  tasks.innerHTML = "";
+  data.map((x, y) => {
+    return (tasks.innerHTML += `
+    <div id=${y}>
+          <span class="fw-bold">${x.text}</span>
+          <span class="small text-secondary">${x.date}</span>
+          <p>${x.description}</p>
+  
+          <span class="options">
+            <i onClick= "editTask(this)" data-bs-toggle="modal" data-bs-target="#form" class="fas fa-edit"></i>
+            <i onClick ="deleteTask(this)" class="fas fa-trash-alt"></i>
+          </span>
+        </div>
+    `);
+  });
 
-  formReset();
+  resetForm();
 };
 
-let formReset = () => {
+let deleteTask = (e) => {
+  e.parentElement.parentElement.remove();
+  data.splice(e.parentElement.parentElement.id, 1);
+  localStorage.setItem("data", JSON.stringify(data));
+  console.log(data);
+};
+
+let editTask = (e) => {
+  let selectedTask = e.parentElement.parentElement;
+
+  textInput.value = selectedTask.children[0].innerHTML;
+  dateInput.value = selectedTask.children[1].innerHTML;
+  textarea.value = selectedTask.children[2].innerHTML;
+
+  deleteTask(e);
+};
+
+let resetForm = () => {
   textInput.value = "";
   dateInput.value = "";
   textarea.value = "";
 };
 
-let deleteTask = (e) => {
-  e.parentElement.parentElement.remove();
-};
-
-let editTask = (e) => {
-  let selectedTask = e.parentElement.parentElement;
-  textInput.value = selectedTask.children[0].innerHTML;
-  dateInput.value = selectedTask.children[1].innerHTML;
-  textarea.value = selectedTask.children[2].innerHTML;
-
-  selectedTask.remove();
-};
+(() => {
+  data = JSON.parse(localStorage.getItem("data"));
+  console.log(data);
+  createTasks();
+})();
