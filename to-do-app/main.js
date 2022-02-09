@@ -28,7 +28,7 @@ let formValidation = () => {
   }
 };
 
-let data = [];
+let data = [{}];
 
 let acceptData = () => {
   data.push({
@@ -87,6 +87,7 @@ let resetForm = () => {
 };
 
 (() => {
+
   data = JSON.parse(localStorage.getItem("data")) || [];
   console.log(data);
   createTasks();
